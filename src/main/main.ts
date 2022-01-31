@@ -16,10 +16,10 @@ import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import {resolveHtmlPath} from './util';
+import TeemoApi, {SummonerPick} from './app/lib/teemo-api';
+import MetaSrc from './app/RunePagesPlugins/MetaSrc';
+import {GameMode, RunePage} from './app/RunePagesPlugins/RunePages';
 import LcuApi from "./app/lib/lcu-api";
-import TeemoApi from "./app/lib/teemo-api";
-import MetaSrc from "./app/RunePagesPlugins/MetaSrc";
-import {GameMode} from "./app/RunePagesPlugins/RunePages";
 
 export default class AppUpdater {
   constructor() {
@@ -28,25 +28,39 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-
+const api = LcuApi.getSingleton();
 const metasrc = new MetaSrc();
 const teemoApi = new TeemoApi();
 
-
 let mainWindow: BrowserWindow | null = null;
 
+//LCU API
+const handleChampionSelect = async (championName: string) => {
+  const pages = await metasrc.getPages(championName, GameMode.URF);
+  mainWindow!.webContents.send('tooltip:set', teemoApi.getToolTips());
+  mainWindow!.webContents.send('champion:set', pages);
+}
 
-//IPC MAIN
+api.on('/lol-champ-select/v1/session:Update', async (data: SummonerPick) => {
+  const championName = await teemoApi.autoChampSelect(data);
+  await handleChampionSelect(championName);
+});
 
-ipcMain.on('champion:update', async (event, name) => {
-  const pages = await metasrc.getPages(name, GameMode.URF);
-  event.reply('tooltip:set',teemoApi.getToolTips());
-  event.reply('champion:set', pages);
-})
+
+// IPC MAIN
+
+
+ipcMain.on('champion:update', async (_event, name) => {
+  await handleChampionSelect(name);
+});
+
+ipcMain.on('runePage:set', async (_event, runePage: RunePage) => {
+  await teemoApi.setRunePage(runePage);
+});
 
 ipcMain.on('tooltips:get', async (event) => {
   event.reply('tooltips:set', teemoApi.getToolTips());
-})
+});
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -157,3 +171,6 @@ app
     });
   })
   .catch(console.log);
+
+
+
