@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import axios from 'axios';
-import {GameMode, RunePage, RunePages} from './RunePages';
+import {GameMode, IRunePage, RunePages} from './RunePages';
 
 export default class MetaSrc extends RunePages {
   public active: boolean = true;
@@ -8,7 +8,7 @@ export default class MetaSrc extends RunePages {
   public id: string = 'metasrc';
   private build: number[] = [];
   public name: string = 'MetaSrc';
-
+  public possibleGameModes: GameMode[] = [GameMode.NORMAL, GameMode.URF, GameMode.ARAM];
   private url = `https://www.metasrc.com/%gamemode/champion/%champion`;
 
   private gameModes = ['5v5', 'aram', 'urf'];
@@ -16,14 +16,14 @@ export default class MetaSrc extends RunePages {
   async getPages(
     championName: string,
     gameMode: GameMode = GameMode.NORMAL
-  ): Promise<RunePage[]> {
+  ): Promise<IRunePage[]> {
     return this.extractPage(championName, this.gameModes[gameMode]);
   }
 
   private async extractPage(championName: string, gameMode: string) {
     const $ = await this.loadPage(championName, gameMode);
     let x = 0;
-    const runePages: RunePage[] = [];
+    const runePages: IRunePage[] = [];
     let mainRune: number[] = [];
     let subRune: number[] = [];
     this.build = [];
@@ -83,7 +83,8 @@ export default class MetaSrc extends RunePages {
     return cheerio.load(data);
   }
 
-  public async getBuild(): any {
+  public async getBuild(): Promise<any> {
     return this.build;
   }
+
 }

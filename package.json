@@ -218,6 +218,7 @@
     "axios": "^0.25.0",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.4",
+    "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "freezer-js": "^0.14.1",
     "history": "^5.2.0",

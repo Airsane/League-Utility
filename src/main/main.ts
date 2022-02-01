@@ -11,15 +11,11 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import {app, BrowserWindow, ipcMain, shell} from 'electron';
+import {app, BrowserWindow, shell} from 'electron';
 import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
-import MenuBuilder from './menu';
 import {resolveHtmlPath} from './util';
-import TeemoApi, {SummonerPick} from './app/lib/teemo-api';
-import MetaSrc from './app/RunePagesPlugins/MetaSrc';
-import {GameMode, RunePage} from './app/RunePagesPlugins/RunePages';
-import LcuApi from "./app/lib/lcu-api";
+import Controller from "./app/lib/Controller";
 
 export default class AppUpdater {
   constructor() {
@@ -28,46 +24,8 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-const api = LcuApi.getSingleton();
-const metasrc = new MetaSrc();
-const teemoApi = new TeemoApi();
 
 let mainWindow: BrowserWindow | null = null;
-
-//LCU API
-const handleChampionSelect = async (championName: string) => {
-  const pages = await metasrc.getPages(championName, GameMode.URF);
-  mainWindow!.webContents.send('tooltip:set', teemoApi.getToolTips());
-  mainWindow!.webContents.send('champion:set', pages);
-}
-
-api.on('/lol-champ-select/v1/session:Update', async (data: SummonerPick) => {
-  const championName = await teemoApi.autoChampSelect(data);
-  await handleChampionSelect(championName);
-});
-
-
-// IPC MAIN
-
-
-ipcMain.on('champion:update', async (_event, name) => {
-  await handleChampionSelect(name);
-});
-
-ipcMain.on('runePage:set', async (_event, runePage: RunePage) => {
-  await teemoApi.setRunePage(runePage);
-});
-
-ipcMain.on('tooltips:get', async (event) => {
-  event.reply('tooltips:set', teemoApi.getToolTips());
-});
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-  teemoApi.getToolTips();
-});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -134,14 +92,13 @@ const createWindow = async () => {
     mainWindow = null;
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
-  menuBuilder.buildMenu();
-
   // Open urls in the user's browser
   mainWindow.webContents.on('new-window', (event, url) => {
     event.preventDefault();
     shell.openExternal(url);
   });
+
+  new Controller(mainWindow);
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

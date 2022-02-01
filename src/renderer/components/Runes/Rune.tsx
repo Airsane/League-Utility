@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { RuneTips } from '../../../main/app/lib/teemo-api';
 
-export const Rune = ({ toolTip }: { toolTip: RuneTips }) => {
+export const Rune = ({ toolTip }: { toolTip: RuneTips  }) => {
   useEffect(() => {
     console.log(toolTip);
   }, []);

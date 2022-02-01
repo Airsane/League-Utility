@@ -1,38 +1,50 @@
 import LcuApi from './lcu-api';
+import axios from "axios";
+import {dataStore} from "./Settings";
 
 export default class TeemoApi {
   private api: LcuApi;
-
   private currentPage!: RunePage;
-
   private summoner!: Summoner;
-
-  private tooltips!: RuneTips[];
+  private leagueVersion!: string;
 
   constructor() {
     this.api = LcuApi.getSingleton();
+    this.getVersion();
     this.registerEvents();
+  }
+
+  private async getVersion() {
+    const data = (await axios.get(`https://ddragon.leagueoflegends.com/realms/euw.json`)).data;
+    this.leagueVersion = data.v;
   }
 
   private async registerEvents() {
     this.api.on('api:connected', () => {
       console.log('Api connected');
       this.updateConnectionData();
+      this.updateStoredData();
     });
+  }
+
+  private async updateStoredData() {
+    if (dataStore.get('version') !== this.leagueVersion && this.leagueVersion) {
+      dataStore.set('tooltips', await this.getUpdatedToolTips());
+      dataStore.set('version',this.leagueVersion);
+    }
   }
 
   private async updateConnectionData() {
     await this.updateSummoner();
-    this.updateCurrentPage();
-    this.updateToolTips();
+    await this.updateCurrentPage();
   }
 
-  private async updateToolTips() {
+  private async getUpdatedToolTips() {
     const data: RuneTips[] = await this.api.get(`/lol-perks/v1/perks`);
-    this.tooltips = data;
+    return data;
   }
 
-  private async updateSummoner() {ok
+  private async updateSummoner() {
     const summoner = await this.api.get(`/lol-summoner/v1/current-summoner`);
     if (!summoner) return;
     this.summoner = summoner;
@@ -41,13 +53,16 @@ export default class TeemoApi {
   public async autoChampSelect(data: SummonerPick) {
     const me = data.myTeam.find((d) => d.cellId === data.localPlayerCellId);
     console.log(me?.championId);
-    if(me)
-    {
+    if (me) {
       const championName = (await this.getChampion(me.championId)).name;
       console.log(championName);
       return championName;
     }
     return '';
+  }
+
+  public getLeagueVersion() {
+    return this.leagueVersion;
   }
 
   private async getChampion(id: number) {
@@ -75,9 +90,8 @@ export default class TeemoApi {
     await this.api.del(`/lol-perks/v1/pages/${id}`);
   }
 
-
   public getToolTips() {
-    return this.tooltips;
+    return dataStore.get('tooltips');
   }
 
   private async updateCurrentPage() {

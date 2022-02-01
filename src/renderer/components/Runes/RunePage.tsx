@@ -1,11 +1,11 @@
 import { Rune } from './Rune';
-import { RunePage } from '../../../main/app/RunePagesPlugins/RunePages';
+import { IRunePage } from '../../../main/app/RunePagesPlugins/RunePages';
 
 export const RunePage = ({
   runePage,
   toolTips,
 }: {
-  runePage: RunePage;
+  runePage: IRunePage;
   toolTips: RuneTips[];
 }) => {
   const setRunePage = () => {
