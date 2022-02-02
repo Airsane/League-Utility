@@ -1,6 +1,6 @@
 import {BrowserWindow, ipcMain} from 'electron';
 import {GameMode, IRunePage} from "../RunePagesPlugins/RunePages";
-import TeemoApi, {RuneTips, SummonerPick} from "./teemo-api";
+import KindredApi, {RuneTips, SummonerPick} from "./kindred-api";
 import LcuApi from "./lcu-api";
 import {settings} from "./Settings";
 import PluginController from "../RunePagesPlugins/PluginController";
@@ -18,7 +18,7 @@ export default class Controller {
     this.ipcMain = ipcMain;
     this.pluginController = new PluginController();
     this.mainWindow = mainWindow;
-    this.teemoApi = new TeemoApi();
+    this.teemoApi = new KindredApi();
     this.lcuApi = LcuApi.getSingleton();
     this.registerListeners();
     console.log(settings.get('test'));

@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react';
 import {Header} from './components/Header';
 import {SideBar} from './components/SideBar';
 import {RunePage} from './components/Runes/RunePage';
-import {RuneTips} from '../main/app/lib/teemo-api';
+import {RuneTips} from '../main/app/lib/kindred-api';
 import {IRunePage} from "../main/app/RunePagesPlugins/RunePages";
 import {TabController} from "./components/tabController";
 import {IInit} from "../main/app/lib/Controller";

@@ -4,7 +4,7 @@ import {dataStore} from "./Settings";
 import {CustomChampion, DDragon} from "../utils/DDragon";
 import {IRunePage} from "../RunePagesPlugins/RunePages";
 
-export default class TeemoApi {
+export default class KindredApi {
   private api: LcuApi;
   private currentPage!: RunePage;
   private summoner!: Summoner;

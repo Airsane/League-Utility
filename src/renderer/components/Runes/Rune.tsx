@@ -1,4 +1,4 @@
-import { RuneTips } from '../../../main/app/lib/teemo-api';
+import { RuneTips } from '../../../main/app/lib/kindred-api';
 
 export const Rune = ({ toolTip }: { toolTip: RuneTips  }) => {
   return (
