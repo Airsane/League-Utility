@@ -12,7 +12,7 @@ export default class Controller {
   private teemoApi;
   private lcuApi;
   private lastChampionName = "";
-  private lastGamemode = 0;
+  private lastGameMode = 0;
 
   constructor(mainWindow: BrowserWindow) {
     this.ipcMain = ipcMain;
@@ -51,16 +51,15 @@ export default class Controller {
     this.ipcMain.on('plugin:update', async (_event, data: { id: string }) => {
       if(!data.id)
         return
-      console.log(data.id);
       this.pluginController.setActivePlugin(data.id);
       if(!this.lastChampionName)
         return
       // Refresh rune pages when plugin is changed.
-      await this.handleChampionSelect(this.lastChampionName,this.lastGamemode);
+      await this.handleChampionSelect(this.lastChampionName,this.lastGameMode);
     })
 
     this.ipcMain.on('champion:update', async (_event, data: { champion: string, gameMode: number }) => {
-      this.lastGamemode = data.gameMode;
+      this.lastGameMode = data.gameMode;
       this.lastChampionName = data.champion;
       await this.handleChampionSelect(data.champion, data.gameMode);
     });

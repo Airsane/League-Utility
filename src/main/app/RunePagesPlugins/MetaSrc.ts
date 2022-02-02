@@ -71,10 +71,6 @@ export default class MetaSrc extends RunePages {
   }
 
   private async loadPage(championName: string, gameMode: string) {
-    console.log(`Loading page metasrc`);
-    console.log(
-      this.url.replace('%gamemode', gameMode).replace('%champion', championName)
-    );
     const {data} = await axios.get(
       this.url
         .replace('%gamemode', gameMode)

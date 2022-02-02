@@ -1,10 +1,6 @@
-import { useEffect } from 'react';
 import { RuneTips } from '../../../main/app/lib/teemo-api';
 
 export const Rune = ({ toolTip }: { toolTip: RuneTips  }) => {
-  useEffect(() => {
-    console.log(toolTip);
-  }, []);
   return (
     <div>
       <img data-toggle="tooltip" data-placement="top" title={toolTip.longDesc.replace(/(<([^>]+)>)/ig,'')}
