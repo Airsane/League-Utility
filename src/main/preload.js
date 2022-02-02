@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const {contextBridge, ipcRenderer} = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld('electron', {
     on(channel, func) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     },
-    removeAllListeners(channel){
+    removeAllListeners(channel) {
       ipcRenderer.removeAllListeners(channel)
     },
     once(channel, func) {
@@ -19,4 +19,22 @@ contextBridge.exposeInMainWorld('electron', {
       }
     },
   },
+  storage: {
+    set(key, value) {
+      ipcRenderer.send('storage:set', {key: key, value: value});
+    },
+    get(key) {
+      return ipcRenderer.sendSync('storage:get', key);
+    },
+    getAll() {
+      return ipcRenderer.sendSync('storage:getAll');
+    },
+    on(key, func) {
+      ipcRenderer.on(`storage:on:${key}`, (event, ...args) => func(...args));
+    },
+    removeListeners(key) {
+      ipcRenderer.removeAllListeners(`storage:on:${key}`)
+
+    }
+  }
 });

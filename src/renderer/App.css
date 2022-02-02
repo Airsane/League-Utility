@@ -1,20 +1,21 @@
 .tabSwitcher{
   display: flex;
-  border-bottom: 1px solid rgb(222, 226, 230);
-  background-color: #ffffffbf;
+  border-bottom: 1px solid #343a40;
+  background-color: #454d55;
 }
 
 .tabSwitcher button{
   border: none;
-  background: #f4f6f9;
+  background: #454d55;
   padding: 5px 17px;
   text-transform: uppercase;
-  border-left: 1px solid rgb(217, 213, 213);
+  border-left: 1px solid #343a40;
   transition: 0.5s;
+  color:#fff;
 }
 
 .tabSwitcher button.active,.tabSwitcher button:hover{
-  background-color: #e3e5e8;
+  background-color: #343a40;
   box-shadow: 0px 10px 13px -7px rgba(0,0,0,0.36), 0px 5px 15px 5px rgba(0,0,0,0);
 }
 

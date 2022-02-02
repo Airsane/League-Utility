@@ -16,6 +16,7 @@ import {autoUpdater} from 'electron-updater';
 import log from 'electron-log';
 import {resolveHtmlPath} from './util';
 import Controller from "./app/lib/Controller";
+import AirStorage from "./app/lib/Storage";
 
 export default class AppUpdater {
   constructor() {
@@ -98,6 +99,13 @@ const createWindow = async () => {
     shell.openExternal(url);
   });
 
+  const storage = AirStorage.getSingleton();
+  const defaultSession:ISession = {
+    connected:false,
+    summonerLevel:0
+  }
+  storage.set('session',defaultSession);
+
   new Controller(mainWindow);
 
   // Remove this if your app does not use auto updates
@@ -131,3 +139,7 @@ app
 
 
 
+export interface ISession{
+  connected:boolean,
+  summonerLevel:number
+}

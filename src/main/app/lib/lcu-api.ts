@@ -1,6 +1,6 @@
 import LCUConnector from 'lcu-connector';
 import WebSocket from 'ws';
-import axios, { Method } from 'axios';
+import axios, {Method} from 'axios';
 import * as https from 'https';
 import EventEmitter from 'events';
 
@@ -11,12 +11,12 @@ export default class LcuApi extends EventEmitter {
 
   private connectionData:
     | {
-        address: string;
-        port: number;
-        username: string;
-        password: string;
-        protocol: string;
-      }
+    address: string;
+    port: number;
+    username: string;
+    password: string;
+    protocol: string;
+  }
     | undefined;
 
   private static singleton: LcuApi | undefined;
@@ -35,6 +35,10 @@ export default class LcuApi extends EventEmitter {
     } else {
       throw new Error('Object already exists please use getSingleton()');
     }
+  }
+
+  public getConnector() {
+    return this.connector;
   }
 
   public static getSingleton() {
@@ -104,7 +108,7 @@ export default class LcuApi extends EventEmitter {
 
   private async handleRequest(method: Method, endpoint: string, body?: any) {
     if (!this.connectionData) return;
-    const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+    const httpsAgent = new https.Agent({rejectUnauthorized: false});
     const url = `${this.connectionData.protocol}://${this.connectionData.address}:${this.connectionData.port}${endpoint}`;
     return (
       await axios({
@@ -120,7 +124,7 @@ export default class LcuApi extends EventEmitter {
     ).data;
   }
 
-  private destroyWebSocket() {
+  public destroyWebSocket() {
     this.ws!.removeAllListeners();
     this.ws = null;
   }

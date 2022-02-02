@@ -3,22 +3,26 @@ import axios from "axios";
 import {dataStore} from "./Settings";
 import {CustomChampion, DDragon} from "../utils/DDragon";
 import {IRunePage} from "../RunePagesPlugins/RunePages";
+import Logger from "./AirLogger";
+import AirStorage from "./Storage";
+import {ISession} from "../../main";
 
 export default class KindredApi {
   private api: LcuApi;
   private currentPage!: RunePage;
-  private summoner!: Summoner;
   private leagueVersion!: string;
   private dDragonApi: DDragon;
+  private logger: Logger;
+  private storage: AirStorage;
 
   constructor() {
     this.api = LcuApi.getSingleton();
+    this.logger = Logger.getSingleton();
     this.dDragonApi = new DDragon();
+    this.storage = AirStorage.getSingleton();
     (async () => {
       await this.getVersion();
       await this.registerEvents();
-      setTimeout(() => {
-      }, 5000);
     })();
   }
 
@@ -28,19 +32,52 @@ export default class KindredApi {
   }
 
   private async registerEvents() {
-    this.api.on('api:connected', () => {
-      console.log('Api connected');
-      this.updateConnectionData();
-      this.updateStoredData();
+    this.api.on('api:connected', async () => {
+      this.logger.info(`Connected to api`);
+      if (await this.checkIfClientIsReady()) {
+        const session = this.storage.get('session') as ISession;
+        session.connected = true;
+        this.storage.set('session', session);
+        await this.updateStoredData();
+      }
     });
+
+    this.api.on('/lol-summoner/v1/current-summoner:Update', (summoner: Summoner) => {
+      this.updateStoredData();
+      const session = this.storage.get('session') as ISession;
+      session.connected = true;
+      session.summonerLevel = summoner.summonerLevel;
+      this.storage.set('session', session);
+    })
+
+    this.api.on('/lol-perks/v1/currentpage:Update', async (page: RunePage) => {
+      console.log(page);
+      this.setCurrentPage(page);
+    })
+  }
+
+  private async checkIfClientIsReady() {
+    try {
+      const data = await this.api.get("/lol-summoner/v1/current-summoner");
+      if (!data) {
+        this.logger.info(`No session found`);
+        return false
+      }
+      this.logger.info(`Session found`);
+      return true
+
+    } catch (err: any) {
+      this.logger.error(`No session found`);
+      return false;
+    }
   }
 
   private async updateStoredData() {
     if (dataStore.get('version') !== this.leagueVersion && this.leagueVersion) {
-      console.log("Updating Data");
-      dataStore.set('tooltips', await this.getUpdatedToolTips());
+      this.logger.debug(`Updating Stored Data from version ${dataStore.get('version')} to ${this.leagueVersion}`);
       dataStore.set('version', this.leagueVersion);
       dataStore.set('champions', await this.dDragonApi.getChampions());
+      await this.getToolTips();
     }
   }
 
@@ -50,22 +87,16 @@ export default class KindredApi {
     dataStore.set('localRunes', runePages);
   }
 
-  private async updateConnectionData() {
-    await this.updateSummoner();
-    await this.updateCurrentPage();
-  }
-
   private async getUpdatedToolTips() {
-    const data: RuneTips[] = await this.api.get(`/lol-perks/v1/perks`);
-    return data;
+    try {
+      this.logger.debug(`Getting tooltips data from league client.`);
+      const data: RuneTips[] = await this.api.get(`/lol-perks/v1/perks`);
+      dataStore.set('tooltips', data);
+    } catch (err: any) {
+      this.logger.error(`Error while getting tooltips ${err.stack}`)
+    }
   }
 
-  private async updateSummoner() {
-    const summoner = await this.api.get(`/lol-summoner/v1/current-summoner`);
-    if (!summoner) return;
-    this.summoner = summoner;
-    this.summoner.summonerId
-  }
 
   private getChampion(searchFunc: any) {
     const champions = dataStore.get('champions') as CustomChampion[];
@@ -121,12 +152,19 @@ export default class KindredApi {
     await this.api.del(`/lol-perks/v1/pages/${id}`);
   }
 
-  public getToolTips(): RuneTips[] {
-    return dataStore.get('tooltips');
+  public async getToolTips(): Promise<RuneTips[]> {
+    const toolTips = dataStore.get('tooltips') as RuneTips[];
+    if (toolTips.length < 1)
+      await this.getUpdatedToolTips()
+    return toolTips;
+  }
+
+  private setCurrentPage(page: RunePage) {
+    this.storage.set('currentPage', page);
   }
 
   private async updateCurrentPage() {
-    this.currentPage = await this.api.get('/lol-perks/v1/currentpage');
+    this.setCurrentPage(await this.api.get('/lol-perks/v1/currentpage'));
   }
 
   public async getCurrentPage(): Promise<RunePage> {
