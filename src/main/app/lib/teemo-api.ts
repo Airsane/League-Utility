@@ -1,17 +1,25 @@
 import LcuApi from './lcu-api';
 import axios from "axios";
 import {dataStore} from "./Settings";
+import {CustomChampion, DDragon} from "../utils/DDragon";
+import {IRunePage} from "../RunePagesPlugins/RunePages";
 
 export default class TeemoApi {
   private api: LcuApi;
   private currentPage!: RunePage;
   private summoner!: Summoner;
   private leagueVersion!: string;
+  private dDragonApi: DDragon;
 
   constructor() {
     this.api = LcuApi.getSingleton();
-    this.getVersion();
-    this.registerEvents();
+    this.dDragonApi = new DDragon();
+    (async () => {
+      await this.getVersion();
+      await this.registerEvents();
+      setTimeout(() => {
+      }, 5000);
+    })();
   }
 
   private async getVersion() {
@@ -29,9 +37,17 @@ export default class TeemoApi {
 
   private async updateStoredData() {
     if (dataStore.get('version') !== this.leagueVersion && this.leagueVersion) {
+      console.log("Updating Data");
       dataStore.set('tooltips', await this.getUpdatedToolTips());
-      dataStore.set('version',this.leagueVersion);
+      dataStore.set('version', this.leagueVersion);
+      dataStore.set('champions', await this.dDragonApi.getChampions());
     }
+  }
+
+  public saveRunePage(runePage: IRunePage) {
+    const runePages = dataStore.get('localRunes') as IRunePage[];
+    runePages.push(runePage);
+    dataStore.set('localRunes', runePages);
   }
 
   private async updateConnectionData() {
@@ -48,14 +64,36 @@ export default class TeemoApi {
     const summoner = await this.api.get(`/lol-summoner/v1/current-summoner`);
     if (!summoner) return;
     this.summoner = summoner;
+    this.summoner.summonerId
+  }
+
+  private getChampion(searchFunc: any) {
+    const champions = dataStore.get('champions') as CustomChampion[];
+    const champion = champions.find(searchFunc);
+    if (!champion)
+      throw new Error(`No champion found`);
+    return champion;
+  }
+
+  public getChampionById(id: number): CustomChampion {
+    const searchFunction = (champion: CustomChampion) => {
+      return champion.id === id;
+    }
+    return this.getChampion(searchFunction);
+  }
+
+
+  public getChampionByName(name: string): CustomChampion {
+    const searchFunction = (champion: CustomChampion) => {
+      return champion.name.toLowerCase() === name.toLowerCase();
+    }
+    return this.getChampion(searchFunction);
   }
 
   public async autoChampSelect(data: SummonerPick) {
     const me = data.myTeam.find((d) => d.cellId === data.localPlayerCellId);
-    console.log(me?.championId);
     if (me) {
-      const championName = (await this.getChampion(me.championId)).name;
-      console.log(championName);
+      const championName = (await this.getChampionById(me.championId)).name;
       return championName;
     }
     return '';
@@ -63,13 +101,6 @@ export default class TeemoApi {
 
   public getLeagueVersion() {
     return this.leagueVersion;
-  }
-
-  private async getChampion(id: number) {
-    const data = await this.api.get(
-      `/lol-champions/v1/inventories/${this.summoner.summonerId}/champions/${id}`
-    );
-    return data;
   }
 
   public async setRunePage(runePage: {
@@ -90,7 +121,7 @@ export default class TeemoApi {
     await this.api.del(`/lol-perks/v1/pages/${id}`);
   }
 
-  public getToolTips() {
+  public getToolTips(): RuneTips[] {
     return dataStore.get('tooltips');
   }
 

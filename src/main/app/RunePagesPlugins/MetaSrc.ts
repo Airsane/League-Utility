@@ -57,7 +57,7 @@ export default class MetaSrc extends RunePages {
           });
         x = 0;
         runePages.push({
-          name: `${gameMode}-${championName} ${mainRune[0]}-${subRune[1]}`,
+          name: `${championName}-${gameMode} ${mainRune[0]}-${subRune[1]}`,
           primaryStyleId: mainRune.shift()!,
           subStyleId: subRune.shift()!,
           selectedPerkIds: mainRune.concat(subRune),

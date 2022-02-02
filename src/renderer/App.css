@@ -1,62 +1,24 @@
-/*
- * @NOTE: Prepend a `~` to css file paths that are in your node_modules
- *        See https://github.com/webpack-contrib/sass-loader#imports
- */
-body {
-  position: relative;
-  color: white;
-  height: 100vh;
-  background: linear-gradient(
-    200.96deg,
-    #fedc2a -29.09%,
-    #dd5789 51.77%,
-    #7a2c9e 129.35%
-  );
-  font-family: sans-serif;
-  overflow-y: hidden;
+.tabSwitcher{
   display: flex;
-  justify-content: center;
-  align-items: center;
+  border-bottom: 1px solid rgb(222, 226, 230);
+  background-color: #ffffffbf;
 }
 
-button {
-  background-color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
+.tabSwitcher button{
   border: none;
-  appearance: none;
-  font-size: 1.3rem;
-  box-shadow: 0px 8px 28px -6px rgba(24, 39, 75, 0.12),
-    0px 18px 88px -4px rgba(24, 39, 75, 0.14);
-  transition: all ease-in 0.1s;
-  cursor: pointer;
-  opacity: 0.9;
+  background: #f4f6f9;
+  padding: 5px 17px;
+  text-transform: uppercase;
+  border-left: 1px solid rgb(217, 213, 213);
+  transition: 0.5s;
 }
 
-button:hover {
-  transform: scale(1.05);
-  opacity: 1;
+.tabSwitcher button.active,.tabSwitcher button:hover{
+  background-color: #e3e5e8;
+  box-shadow: 0px 10px 13px -7px rgba(0,0,0,0.36), 0px 5px 15px 5px rgba(0,0,0,0);
 }
 
-li {
-  list-style: none;
+.tabSwitcher button:first-child{
+  border-left: none;
 }
 
-a {
-  text-decoration: none;
-  height: fit-content;
-  width: fit-content;
-  margin: 10px;
-}
-
-a:hover {
-  opacity: 1;
-  text-decoration: none;
-}
-
-.Hello {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
-}

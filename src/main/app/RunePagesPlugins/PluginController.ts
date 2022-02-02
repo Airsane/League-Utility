@@ -1,5 +1,6 @@
 import {RunePages} from "./RunePages";
 import MetaSrc from "./MetaSrc";
+import LocalPage from "./LocalPage";
 
 export default class PluginController {
   private runePlugins: RunePages[] = [];
@@ -10,13 +11,16 @@ export default class PluginController {
   }
 
   private loadPlugins() {
+    this.runePlugins.push(new LocalPage());
     this.runePlugins.push(new MetaSrc());
-    this.selectedPlugin = this.runePlugins[0].name;
+    this.selectedPlugin = this.runePlugins[0].id;
     this.runePlugins = this.runePlugins.filter((pl) => pl.active);
   }
 
-  public getPlugins(): string[] {
-    return this.runePlugins.map((pl) => pl.name);
+  public getPlugins(): { name: string, id: string }[] {
+    return this.runePlugins.map((pl) => {
+      return {name: pl.name, id: pl.id};
+    });
   }
 
   public getPluginInfo(name: string) {
@@ -25,13 +29,13 @@ export default class PluginController {
   }
 
   public getActivePlugin(): RunePages {
-    return this.runePlugins.find((plugin) => plugin.name === this.selectedPlugin)!;
+    return this.runePlugins.find((plugin) => plugin.id === this.selectedPlugin)!;
   }
 
-  public setActivePlugin(name: string) {
-    if (!this.runePlugins.find((plugin) => plugin.name === name)) {
-      throw new Error("Invalid plugin name " + name);
+  public setActivePlugin(id: string) {
+    if (!this.runePlugins.find((plugin) => plugin.id === id)) {
+      throw new Error("Invalid plugin name " + id);
     }
-    this.selectedPlugin = name;
+    this.selectedPlugin = id;
   }
 }

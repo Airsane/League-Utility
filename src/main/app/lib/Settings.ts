@@ -23,5 +23,6 @@ export const dataStore = new Store({
     },
     version: "",
     tooltips: [],
+    localRunes:[]
   }
 });

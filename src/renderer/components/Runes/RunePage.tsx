@@ -1,30 +1,44 @@
-import { Rune } from './Rune';
-import { IRunePage } from '../../../main/app/RunePagesPlugins/RunePages';
+import {Rune} from './Rune';
+import {IRunePage} from '../../../main/app/RunePagesPlugins/RunePages';
 
 export const RunePage = ({
-  runePage,
-  toolTips,
-}: {
+                           runePage,
+                           toolTips,
+                           isLocalPage
+                         }: {
   runePage: IRunePage;
   toolTips: RuneTips[];
+  isLocalPage: boolean;
 }) => {
   const setRunePage = () => {
     window.electron.ipcRenderer.send('runePage:set', runePage);
   };
 
+  const saveRunePage = () =>{
+    window.electron.ipcRenderer.send('runePage:save', runePage);
+  }
+
+  const showSaveButton = () => {
+    if (isLocalPage)
+      return
+    return (<button className="btn btn-success" onClick={saveRunePage}>
+      Save Rune
+    </button>)
+  }
+
   return (
     <div className="card">
       <div className="card-header ui-sortable-handle">
         <h3 className="card-title">
-          <i className="fas fa-chart-pie mr-1" />
+          <i className="fas fa-chart-pie mr-1"/>
           {runePage.name}
         </h3>
       </div>
       <div className="card-body">
         <div className="tab-content p-0">
           <div className="primaryRunes row">
-            {runePage.selectedPerkIds.map((perk) => {
-              return <Rune toolTip={toolTips.find((t) => t.id === perk)!} />;
+            {runePage.selectedPerkIds.map((perk, i) => {
+              return <Rune key={i} toolTip={toolTips.find((t) => t.id === perk)!}/>;
             })}
           </div>
           <div className="secondaryRunes row">
@@ -44,6 +58,7 @@ export const RunePage = ({
         <button className="btn btn-primary" onClick={setRunePage}>
           Set Runes
         </button>
+        {showSaveButton()}
       </div>
     </div>
   );
@@ -58,4 +73,5 @@ export interface RuneTips {
   tooltip: string;
 }
 
-export interface PageBuild {}
+export interface PageBuild {
+}

@@ -10,7 +10,6 @@ export class DDragon {
   constructor() {
     (async () => {
       this.latestVersion = await this.getLatestVersion();
-      this._runesReforged = await this.getRunesReforged();
     })();
   }
 
@@ -19,21 +18,96 @@ export class DDragon {
   }
 
   private async getLatestVersion() {
-    const { data } = await axios.get(`${this.URL}api/versions.json`);
+    const {data} = await axios.get(`${this.URL}api/versions.json`);
     return data[0];
   }
 
-  private async getRunesReforged(): Promise<RuneReforged[]> {
-    if (!this.latestVersion) this.latestVersion = await this.getLatestVersion();
-    console.log(
-      `${this.URL}cdn/${this.latestVersion}/data/en_US/runesReforged.json`
-    );
-    const { data } = await axios.get(
-      `${this.URL}cdn/${this.latestVersion}/data/en_US/runesReforged.json`
-    );
-    return data;
+  public async getChampions(): Promise<CustomChampion[]> {
+    const data = (await axios.get(`${this.URL}cdn/${this.latestVersion}/data/en_US/champion.json`)).data as DDragonChampions;
+    const champions: CustomChampion[] = [];
+    for (const key in data.data) {
+      const champ = data.data[key];
+      champions.push({
+        name: champ.name,
+        id: champ.key,
+        title: champ.title
+      })
+    }
+    return champions;
   }
 }
+
+
+export interface CustomChampion {
+  name: string;
+  id: number
+  title: string;
+}
+
+interface DDragonChampions {
+  type: Type;
+  format: string;
+  version: Version;
+  data: { [key: string]: Champion };
+}
+
+interface Champion {
+  version: Version;
+  id: string;
+  key: number;
+  name: string;
+  title: string;
+  blurb: string;
+  info: Info;
+  image: Image;
+  tags: Tag[];
+  partype: string;
+  stats: { [key: string]: number };
+}
+
+interface Image {
+  full: string;
+  sprite: Sprite;
+  group: Type;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+enum Type {
+  Champion = "champion",
+}
+
+enum Sprite {
+  Champion0png = "champion0.png",
+  Champion1png = "champion1.png",
+  Champion2png = "champion2.png",
+  Champion3png = "champion3.png",
+  Champion4png = "champion4.png",
+  Champion5png = "champion5.png",
+}
+
+interface Info {
+  attack: number;
+  defense: number;
+  magic: number;
+  difficulty: number;
+}
+
+enum Tag {
+  Assassin = "Assassin",
+  Fighter = "Fighter",
+  Mage = "Mage",
+  Marksman = "Marksman",
+  Support = "Support",
+  Tank = "Tank",
+}
+
+export enum Version {
+  The1221 = "12.2.1",
+}
+
 
 export interface RuneReforged {
   id: number;

@@ -5,36 +5,58 @@ import {SideBar} from './components/SideBar';
 import {RunePage} from './components/Runes/RunePage';
 import {RuneTips} from '../main/app/lib/teemo-api';
 import {IRunePage} from "../main/app/RunePagesPlugins/RunePages";
+import {TabController} from "./components/tabController";
+import {IInit} from "../main/app/lib/Controller";
+
+export interface IPlugin {
+  name: string,
+  id: string
+}
 
 const Hello = () => {
   const [runePages, setRunePages] = useState<IRunePage[]>([]);
   const [toolTips, setToolTips] = useState<RuneTips[]>([]);
-  const test = () => {
-    //@ts-ignore
-    window.electron.ipcRenderer.send('champion:update', document.querySelector('#ChampionPick').value);
-  };
+  const [plugins, setPlugins] = useState<IPlugin[]>([]);
+  const [currentTab, setCurrentTab] = useState<string>("");
+
   useEffect(() => {
     (async () => {
       window.electron.ipcRenderer.on(
         'champion:set', (runePages: IRunePage[]
         ) => {
-          console.log("xddd")
           setRunePages(runePages);
         }
       );
 
-      window.electron.ipcRenderer.on('tooltip:set', (toolTips: RuneTips[]) => {
-        setToolTips(toolTips);
+      window.electron.ipcRenderer.on('init', (initPackage: IInit) => {
+        setCurrentTab(initPackage.plugins[0].id);
+        setPlugins(initPackage.plugins);
+        setToolTips(initPackage.tooltips);
       });
+      window.electron.ipcRenderer.send('ready', true);
+
     })();
+
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('champion:set');
+      window.electron.ipcRenderer.removeAllListeners('init');
+    }
   }, []);
+
+  useEffect(() => {
+    window.electron.ipcRenderer.send('plugin:update', {id: currentTab});
+  }, [currentTab]);
+
+  const handleSwitchTab = (tabId: string) => {
+    setCurrentTab(tabId)
+  }
 
   const showRunePages = () => {
     if (runePages.length > 0 && toolTips.length > 0) {
-      return runePages.map((runePage) => {
+      return runePages.map((runePage, i) => {
         return (
           <section className="col-md-6">
-            <RunePage toolTips={toolTips} runePage={runePage}/>
+            <RunePage key={i} toolTips={toolTips} isLocalPage={currentTab === 'local-page'} runePage={runePage}/>
           </section>
         );
       });
@@ -47,12 +69,12 @@ const Hello = () => {
       <Header/>
       <SideBar/>
       <div className="content-wrapper">
-        <div className="content-header"/>
+        <TabController currentPage={currentTab} plugins={plugins} handleClick={handleSwitchTab}/>
+        <div className="content-header"></div>
         <section className="content">
           <div className="container-fluid">
             <div className="row">{showRunePages()}</div>
           </div>
-          <button onClick={test}>test</button>
         </section>
       </div>
     </div>

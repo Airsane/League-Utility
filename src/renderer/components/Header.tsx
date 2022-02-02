@@ -1,9 +1,21 @@
 export const Header = () => {
+
+  const findChampion = (e:any)=>{
+    e.preventDefault();
+    const inputField = document.querySelector('#ChampionPick')! as HTMLInputElement
+    const data ={
+      champion:inputField.value,
+      gameMode:0
+    }
+    window.electron.ipcRenderer.send('champion:update', data);
+  }
+
+
   return (
     <nav className="main-header navbar navbar-expand navbar-white navbar-light">
       <ul className="navbar-nav" />
 
-      <form className="form-inline ml-3">
+      <form onSubmit={findChampion} className="form-inline ml-3">
         <div className="input-group input-group-sm">
           <input
             className="form-control form-control-navbar"
