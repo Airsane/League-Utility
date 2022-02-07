@@ -1,6 +1,7 @@
 import {RunePages} from "./RunePages";
 import MetaSrc from "./MetaSrc";
 import LocalPage from "./LocalPage";
+import opGG from "./OpGG";
 
 export default class PluginController {
   private runePlugins: RunePages[] = [];
@@ -13,6 +14,7 @@ export default class PluginController {
   private loadPlugins() {
     this.runePlugins.push(new LocalPage());
     this.runePlugins.push(new MetaSrc());
+    this.runePlugins.push(new opGG());
     this.selectedPlugin = this.runePlugins[0].id;
     this.runePlugins = this.runePlugins.filter((pl) => pl.active);
   }

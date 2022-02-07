@@ -26,7 +26,6 @@ export class DDragon {
     const data = (await axios.get(`${this.URL}cdn/${this.latestVersion}/data/en_US/champion.json`)).data as DDragonChampions;
     const champions: CustomChampion[] = [];
     for (const key of Object.keys(data.data)) {
-      console.log(key);
       const champ = data.data[key];
       champions.push({
         name: champ.name,
