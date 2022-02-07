@@ -19,6 +19,9 @@ export default class MetaSrc extends RunePages {
 
   private async extractPage(championName: string) {
     const runePages: IRunePage[] = [];
+    const isCached = this.isCached(championName);
+    if(isCached)
+      return isCached.runePages;
     for (const gameMode of this.gameModes) {
       const $ = await this.loadPage(championName, gameMode);
       let x = 0;
@@ -67,6 +70,7 @@ export default class MetaSrc extends RunePages {
         }
       });
     }
+    this.addToCache(championName,runePages);
     return runePages;
   }
 

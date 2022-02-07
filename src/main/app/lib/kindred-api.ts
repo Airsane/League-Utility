@@ -38,6 +38,7 @@ export default class KindredApi {
         session.connected = true;
         this.storage.set('session', session);
         await this.updateStoredData();
+        await this.updateCurrentPage();
       }
     });
 

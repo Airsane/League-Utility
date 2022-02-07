@@ -6,13 +6,13 @@ export const Header = () => {
   const [champions, setChampions] = useState<any[]>([]);
 
 
-  const findChampion = (e: any) => {
+  const findChampion = (e: any,value:any) => {
     e.preventDefault();
-    const inputField = document.querySelector('#ChampionPick')! as HTMLInputElement
     const data = {
-      champion: inputField.value.replace(/[^a-z0-9]/gi, "").replace(' ',''),
+      champion: value.label.replace(/[^a-z0-9]/gi, "").replace(' ',''),
       gameMode: 0
     }
+    console.log("Updating champ " + data.champion);
     window.electron.ipcRenderer.send('champion:update', data);
   }
 
@@ -34,9 +34,9 @@ export const Header = () => {
     <nav className="main-header navbar navbar-expand navbar-white navbar-light">
       <ul className="navbar-nav"/>
 
-      <form onSubmit={findChampion} className="form-inline ml-3">
+      <form onSubmit={(e) =>{e.preventDefault();}} className="form-inline ml-3">
         <div className="input-group input-group-sm">
-          <Autocomplete  disablePortal size={"small"} id="ChampionPick" sx={{ width: 300 }} renderInput={(params => <TextField {...params} label="Champion"/>)} options={champions}
+          <Autocomplete onChange={findChampion}  disablePortal size={"small"} id="ChampionPick" sx={{ width: 300 }} renderInput={(params => <TextField {...params} label="Champion"/>)} options={champions}
           />
         </div>
       </form>
