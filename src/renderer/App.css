@@ -17,11 +17,25 @@
 .rune-page-row{
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.rune-card{
+  overflow: auto;
+  max-height: 370px;
+}
+
+.current-rune-card{
+  max-height: 115px;
+  overflow: hidden;
 }
 
 .rune-page-row img{
-  width: 45px;
+  width: 40px;
   border-radius: 100%;
+}
+
+.rune-page-row div{
 }
 
 .runes{
