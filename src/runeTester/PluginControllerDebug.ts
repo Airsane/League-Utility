@@ -1,6 +1,5 @@
-import MetaSrc from "../main/app/RunePagesPlugins/MetaSrc";
-import opGG from "../main/app/RunePagesPlugins/OpGG";
 import {RunePages} from "../main/app/RunePagesPlugins/RunePages";
+import MetaSrc from "../main/app/RunePagesPlugins/MetaSrc";
 
 
 export default class PluginControllerDebug {
@@ -13,7 +12,6 @@ export default class PluginControllerDebug {
 
   private loadPlugins() {
     this.runePlugins.push(new MetaSrc());
-    this.runePlugins.push(new opGG());
     this.selectedPlugin = this.runePlugins[0].id;
     this.runePlugins = this.runePlugins.filter((pl) => pl.active);
   }

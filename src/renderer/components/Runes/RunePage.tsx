@@ -40,7 +40,11 @@ export const RunePage = ({
   return (
     <div className="rune-page-row mb-3">
       <div className="runes">{runePage.selectedPerkIds.map((perk, i) => {
-        return <Rune key={i} toolTip={toolTips.find((t) => t.id === perk)!}/>;
+        console.log(perk);
+        let tooltip = toolTips.find((t) => t.id === perk);
+        if(!tooltip)
+          console.log(perk);
+        return <Rune key={i} toolTip={tooltip!}/>;
       })}</div>
       <div className="text-sm">{runePage.name}</div>
       <div>

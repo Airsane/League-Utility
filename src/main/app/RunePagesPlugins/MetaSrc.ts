@@ -24,10 +24,6 @@ export default class MetaSrc extends RunePages {
       return isCached.runePages;
     for (const gameMode of this.gameModes) {
       const $ = await this.loadPage(championName, gameMode);
-      let x = 0;
-
-      let mainRune: number[] = [];
-      let subRune: number[] = [];
       this.build = [];
       $(
         '#content > div._qngo9y > div:nth-child(4) > div._5cna4p > div:nth-child(4) > div > div > div:nth-child(1) > div > div.tooltipped'
@@ -35,40 +31,31 @@ export default class MetaSrc extends RunePages {
         this.build.push(parseInt(el.attribs['data-tooltip'].replace('x-item-', ''), 10));
       });
 
-      $("div[id$='0-content'] > div").each((_i, el) => {
-        if (x % 2 === 0) {
-          $(el)
-            .children()
-            .each((_i1, el1) => {
-              if (el1.attribs['data-tooltip']) {
-                mainRune.push(
-                  parseInt(el1.attribs['data-tooltip'].replace('perk-', ''), 10)
-                );
-              }
-            });
-          x++;
-        } else {
-          $(el)
-            .children()
-            .each((_i1, el1) => {
-              if (el1.attribs['data-tooltip']) {
-                subRune.push(
-                  parseInt(el1.attribs['data-tooltip'].replace('perk-', ''), 10)
-                );
-              }
-            });
-          x = 0;
-          runePages.push({
-            name: `[${gameMode.toUpperCase()}] ${championName} ${mainRune[0]}-${subRune[1]}`,
-            primaryStyleId: mainRune.shift()!,
-            subStyleId: subRune.shift()!,
-            selectedPerkIds: mainRune.concat(subRune),
-            build: this.build,
-          });
-          mainRune = [];
-          subRune = [];
+      const images = $('svg > image[data-xlink-href]');
+      for(let i = 8; i < 40; i+=10){
+        let mainStyle:number;
+        let subStyle:number;
+        let selectedRunes:number[] = [];
+        for(let j = 0; j < 11; j++){
+          const rune = parseInt($(images[i+j]).parent().parent()[0]!.attribs['data-tooltip'].replace('perk-', ''),10);
+          if(j == 0){
+            mainStyle = rune;
+            continue;
+          }
+          if(j == 5){
+            subStyle = rune;
+            continue;
+          }
+          selectedRunes.push(rune);
         }
-      });
+        runePages.push({
+          name: `[${gameMode.toUpperCase()}] ${championName} ${mainStyle!}-${subStyle!}`,
+          build:this.build,
+          primaryStyleId:mainStyle!,
+          selectedPerkIds:selectedRunes,
+          subStyleId:subStyle!
+        })
+      }
     }
     this.addToCache(championName,runePages);
     return runePages;

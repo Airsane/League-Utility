@@ -1,7 +1,7 @@
 import {RunePages} from "./RunePages";
 import MetaSrc from "./MetaSrc";
-import opGG from "./OpGG";
 import LocalPage from "./LocalPage";
+import opGG from "./OpGG";
 
 export default class PluginController {
   private runePlugins: RunePages[] = [];
