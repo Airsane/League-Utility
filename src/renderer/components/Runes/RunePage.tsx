@@ -4,11 +4,13 @@ import {IRunePage} from '../../../main/app/RunePagesPlugins/RunePages';
 export const RunePage = ({
                            runePage,
                            toolTips,
-                           isLocalPage
+                           isLocalPage,
+                           isCurrentPage = false
                          }: {
   runePage: IRunePage;
   toolTips: RuneTips[];
   isLocalPage: boolean;
+  isCurrentPage?:boolean;
 }) => {
   const setRunePage = () => {
     window.electron.ipcRenderer.send('runePage:set', runePage);
@@ -22,8 +24,17 @@ export const RunePage = ({
     if (isLocalPage)
       return
     return (<button className="btn btn-success" onClick={saveRunePage}>
-      Save Rune
+      <i className="fas fa-download"></i>
     </button>)
+  }
+
+  const showUploadButton = ()=>{
+    if(!isCurrentPage){
+      return(<button className="btn btn-primary" onClick={setRunePage}>
+        <i className="fas fa-upload"></i>
+      </button>)
+    }
+    return
   }
 
   return (
@@ -31,22 +42,11 @@ export const RunePage = ({
       <div className="runes">{runePage.selectedPerkIds.map((perk, i) => {
         return <Rune key={i} toolTip={toolTips.find((t) => t.id === perk)!}/>;
       })}</div>
-      <span>{runePage.name}</span>
+      <div className="text-sm">{runePage.name}</div>
       <div>
-        <button className="btn btn-primary" onClick={setRunePage}>
-          Set Runes
-        </button>
         {showSaveButton()}
+        {showUploadButton()}
       </div>
-      <div>{runePage.build.map((item) => {
-        return (
-          <img
-            width="50px"
-            height="50px"
-            src={`https://ddragon.leagueoflegends.com/cdn/12.2.1/img/item/${item}.png`}
-          />
-        );
-      })}</div>
     </div>
     // <div className="card">
     //   <div className="card-header ui-sortable-handle">

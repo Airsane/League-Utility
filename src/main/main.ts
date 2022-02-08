@@ -70,7 +70,7 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
+    width: 1128,
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
@@ -90,6 +90,8 @@ const createWindow = async () => {
       mainWindow.show();
     }
   });
+
+  mainWindow.setMenu(null);
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -146,3 +148,6 @@ export interface ISession{
   connected:boolean,
   summonerLevel:number
 }
+
+
+

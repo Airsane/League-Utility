@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 import axios, {Method} from 'axios';
 import * as https from 'https';
 import EventEmitter from 'events';
+import Logger from "./AirLogger";
 
 export default class LcuApi extends EventEmitter {
   private readonly connector;
@@ -27,7 +28,7 @@ export default class LcuApi extends EventEmitter {
       LcuApi.singleton = this;
       this.connector = new LCUConnector();
       this.connector.on('connect', (data) => {
-        console.log('Connect');
+        Logger.getSingleton().info('Connected');
         this.connectionData = data;
         this.connectToWebSocket();
       });

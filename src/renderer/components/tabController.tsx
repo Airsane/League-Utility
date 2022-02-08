@@ -9,8 +9,8 @@ export const TabController = ({handleClick, currentPage, plugins}: { handleClick
   }
 
   const renderButtons = () => {
-    return plugins.map((plugin) => {
-      return <button onClick={handleClickBtn} data-id={plugin.id} className={plugin.id===currentPage ? "active" : ""}>{plugin.name}</button>
+    return plugins.map((plugin,index) => {
+      return <button onClick={handleClickBtn} key={index} data-id={plugin.id} className={plugin.id===currentPage ? "active" : ""}>{plugin.name}</button>
     })
   }
 

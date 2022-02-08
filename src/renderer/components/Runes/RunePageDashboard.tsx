@@ -12,7 +12,7 @@ export const RunePageDashboard = () => {
   const [toolTips, setToolTips] = useState<RuneTips[]>([]);
   const [plugins, setPlugins] = useState<IPlugin[]>([]);
   const [currentTab, setCurrentTab] = useState<string>("");
-
+  const [currentPage, setCurrentPage] = useState<IRunePage | null>(null);
   useEffect(() => {
     window.electron.ipcRenderer.send('plugin:update', {id: currentTab});
   }, [currentTab]);
@@ -37,14 +37,23 @@ export const RunePageDashboard = () => {
       window.electron.ipcRenderer.on(
         'champion:set', (receivedRunePage: IRunePage[]
         ) => {
+          console.log(receivedRunePage);
           setRunePages(receivedRunePage);
         }
       );
+
+      window.electron.storage.on('currentPage', (currentRune: IRunePage) => {
+        setCurrentPage(currentRune ?? null);
+      })
 
       window.electron.ipcRenderer.on('init', (initPackage: IInit) => {
         setCurrentTab(initPackage.plugins[0].id);
         setPlugins(initPackage.plugins);
         setToolTips(initPackage.tooltips);
+        const page = window.electron.storage.get('currentPage');
+        if (page) {
+          setCurrentPage(page);
+        }
       });
       window.electron.ipcRenderer.send('ready', true);
 
@@ -52,9 +61,16 @@ export const RunePageDashboard = () => {
 
     return () => {
       window.electron.ipcRenderer.removeAllListeners('champion:set');
+      window.electron.storage.removeListeners('currentPage');
       window.electron.ipcRenderer.removeAllListeners('init');
     }
   }, []);
+
+  const renderCurrentRunePage = () => {
+    if (currentPage)
+      return (<RunePage toolTips={toolTips} isLocalPage={false} isCurrentPage={true} runePage={currentPage}/>)
+    return <h1>No runepage</h1>
+  }
 
   return (
     <div><TabController currentPage={currentTab} plugins={plugins} handleClick={handleSwitchTab}/>
@@ -63,7 +79,7 @@ export const RunePageDashboard = () => {
         <div className="container-fluid">
           <div className="row">
             <section className="col-md-12">
-              <div className="card">
+              <div className="card rune-card">
                 <div className="card-header">
                   <h3 className="card-title">
                     Aatrox
@@ -71,6 +87,16 @@ export const RunePageDashboard = () => {
                 </div>
                 <div className="card-body">
                   {showRunePages()}
+                </div>
+              </div>
+              <div className="card current-rune-card">
+                <div className="card-header">
+                  <h3 className="card-title">
+                    Current rune page
+                  </h3>
+                </div>
+                <div className="card-body">
+                  {renderCurrentRunePage()}
                 </div>
               </div>
             </section>

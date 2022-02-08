@@ -20,7 +20,6 @@ export default class KindredApi {
     this.dDragonApi = new DDragon();
     this.storage = AirStorage.getSingleton();
     (async () => {
-      await this.getVersion();
       await this.registerEvents();
     })();
   }
@@ -33,6 +32,7 @@ export default class KindredApi {
   private async registerEvents() {
     this.api.on('api:connected', async () => {
       this.logger.info(`Connected to api`);
+      await this.getVersion();
       if (await this.checkIfClientIsReady()) {
         const session = this.storage.get('session') as ISession;
         session.connected = true;
@@ -165,11 +165,12 @@ export default class KindredApi {
   }
 
   private async updateCurrentPage() {
+    this.logger.debug("Upgrading current rune page",__filename)
     this.setCurrentPage(await this.api.get('/lol-perks/v1/currentpage'));
   }
 
   public getCurrentPage(): RunePage {
-    return this.storage.get('currentPage');
+    return this.storage.get('currentPage') ?? null;
   }
 }
 
