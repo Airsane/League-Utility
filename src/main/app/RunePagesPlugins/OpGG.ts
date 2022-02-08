@@ -16,7 +16,7 @@ export default class opGG extends RunePages {
 
     const entryChampUrl = this.url + championName;
     const pages = await this.extractPages(entryChampUrl, championName);
-    this.addToCache(championName,pages);
+    this.addToCache(championName, pages);
     return pages;
   }
 
@@ -33,15 +33,14 @@ export default class opGG extends RunePages {
     return (runePageElement: any, index: number) => {
 
       const stats = $(runePageElement).parent()
-        .find('> div:nth-child('+(index%2+1)*2+') div.rune-setting__ratio-value')
-        .map((i, elem) => {
-          console.log(elem)
-          return $(elem).text()
+        .find('> div:nth-child(' + (index % 2 + 1) * 2 + ') div.rune-setting__ratio-value')
+        .map((_, elem) => {
+          return $(elem).text().trim()
         })
         .get();
 
 
-      const name = `${champion} ${position.toUpperCase()} PR${stats[0]} WR${stats[1]}`;
+      const name = `${champion} ${position.toUpperCase()} PR: ${stats[0]} WR: ${stats[1]}`;
 
       let selectedPerkIds = $(runePageElement)
         .find('div.perk-page__item.perk-page__item--active > div > img')
@@ -78,8 +77,6 @@ export default class opGG extends RunePages {
 
   private async extractPages(entryChampUrl: string, champion: string) {
     const $ = cheerio.load((await axios.get(entryChampUrl)).data);
-    let pages = [];
-
     let initPos: string;
 
     const positions = $('.champion__list--position > div').map((_, element) => {
@@ -89,11 +86,18 @@ export default class opGG extends RunePages {
       return element.attribs['data-position'].toLowerCase();
     }).get();
 
-    pages = this.parsePage($, champion, initPos!);
+    let pages: IRunePage[] = this.parsePage($, champion, initPos!);
 
-    return pages;
     positions.splice(positions.indexOf(initPos!), 1);
 
+    if (positions.length) {
+      for (const position of positions) {
+        const url = this.url + champion + '/statistics/' + position;
+        const page = this.parsePage(cheerio.load((await axios.get(url)).data), champion, position);
+        pages = pages.concat(page);
+      }
+    }
+    return pages;
   }
 
   getBuild(): any {
